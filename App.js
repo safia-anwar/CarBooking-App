@@ -1,3 +1,5 @@
+navigator.geolocation = require('@react-native-community/geolocation');
+
 import React from 'react';
 import createStore from "./src/store/createStore";
 import AppContainer from "./src/AppContainer";
