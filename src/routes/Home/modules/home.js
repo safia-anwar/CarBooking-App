@@ -1,13 +1,27 @@
 import update from "react-addons-update";
 import constants from "./actionConstants";
 import { Dimensions } from "react-native";
+import RNGooglePlaces from "react-native-google-places";
+
+
+import request from "../../../util/request";
+
+import calculateFare from "../../../util/fareCalculator.js";
+
 
 
 
 //--------------------
 //Constants
 //--------------------
-const { GET_CURRENT_LOCATION } = constants;
+const { GET_CURRENT_LOCATION,
+        GET_INPUT ,
+		TOGGLE_SEARCH_RESULT,
+		GET_ADDRESS_PREDICTIONS,
+		GET_SELECTED_ADDRESS,
+		GET_DISTANCE_MATRIX,
+		GET_FARE,
+		 } = constants;
 
 
 
@@ -43,6 +57,108 @@ export function getCurrentLocation(){
 }
 
 
+//GET USER INPUT
+
+export function getInputData(payload){
+	return{
+		type:GET_INPUT,
+		payload
+	}
+}
+
+
+
+//toggle search result modal
+export function toggleSearchResultModal(payload){
+	return{
+		type:TOGGLE_SEARCH_RESULT,
+		payload
+	}
+}
+
+
+//GET ADRESSES FROM GOOGLE PLACE
+
+export function getAddressPredictions(){
+	return(dispatch, store)=>{
+		let userInput = store().home.resultTypes.pickUp ? store().home.inputData.pickUp : store().home.inputData.dropOff;
+		RNGooglePlaces.getAutocompletePredictions(userInput,
+			{
+				country:"PK"
+			}
+		)
+		.then((results)=>
+			dispatch({
+				type:GET_ADDRESS_PREDICTIONS,
+				payload:results
+			})
+		)
+		.catch((error)=> console.log(error.message));
+	};
+}
+
+
+
+//get selected address
+
+export function getSelectedAddress(payload){
+	const dummyNumbers ={
+		baseFare:0.4,
+		timeRate:0.14,
+		distanceRate:0.97,
+		surge:1
+	}
+	return(dispatch, store)=>{
+		RNGooglePlaces.lookUpPlaceByID(payload)
+		.then((results)=>{
+			dispatch({
+				type:GET_SELECTED_ADDRESS,
+				payload:results
+			})
+		})
+		.then(()=>{
+			//Get the distance and time
+			if(store().home.selectedAddress.selectedPickUp && store().home.selectedAddress.selectedDropOff){
+				request.get("https://maps.googleapis.com/maps/api/distancematrix/json")
+				.query({
+					origins:store().home.selectedAddress.selectedPickUp.latitude + "," + store().home.selectedAddress.selectedPickUp.longitude,
+					destinations:store().home.selectedAddress.selectedDropOff.latitude + "," + store().home.selectedAddress.selectedDropOff.longitude,
+					mode:"driving",
+					key:"AIzaSyCGpKnx7FwPzEUQUEtTYKA9bpKgOMpMCOE"
+				})
+				.finish((error, res)=>{
+					dispatch({
+						type:GET_DISTANCE_MATRIX,
+						payload:res.body
+					});
+				})
+			}
+			setTimeout(function(){
+				if(store().home.selectedAddress.selectedPickUp && store().home.selectedAddress.selectedDropOff){
+					const fare = calculateFare(
+						dummyNumbers.baseFare,
+						dummyNumbers.timeRate,
+						store().home.distanceMatrix.rows[0].elements[0].duration.value,
+						dummyNumbers.distanceRate,
+						store().home.distanceMatrix.rows[0].elements[0].distance.value,
+						dummyNumbers.surge,
+					);
+					dispatch({
+						type:GET_FARE,
+						payload:fare
+					})
+				}
+
+
+			},2000)
+
+		})
+		.catch((error)=> console.log(error.message));
+	}
+}
+
+
+
 //--------------------
 //Action Handlers
 //--------------------
@@ -66,13 +182,116 @@ function handleGetCurrentLocation(state, action){
 	})
 }
 
+
+function handleGetInputDate(state, action){
+	const { key, value } = action.payload;
+	return update(state, {
+		inputData:{
+			[key]:{
+				$set:value
+			}
+		}
+	});
+}
+
+
+function handleToggleSearchResult(state, action){
+	if(action.payload === "pickUp"){
+		return update(state, {
+			resultTypes:{
+				pickUp:{
+					$set:true,
+				},
+				dropOff:{
+					$set:false
+				}
+			},
+			predictions:{
+				$set:{}
+			}
+
+		});
+	}
+	if(action.payload === "dropOff"){
+		return update(state, {
+			resultTypes:{
+				pickUp:{
+					$set:false,
+				},
+				dropOff:{
+					$set:true
+				}
+			},
+			predictions:{
+			$set:{}
+			}
+
+		});
+	}
+
+}
+
+function handleGetAddressPredictions(state, action){
+	return update(state, {
+		predictions:{
+			$set:action.payload
+		}
+	})
+}
+
+function handleGetSelectedAddress(state, action){
+	let selectedTitle = state.resultTypes.pickUp ? "selectedPickUp" : "selectedDropOff"
+	return update(state, {
+		selectedAddress:{
+			[selectedTitle]:{
+				$set:action.payload
+			}		
+		},
+		resultTypes:{
+			pickUp:{
+				$set:false
+			},
+			dropOff:{
+				$set:false
+			}
+		}
+	})
+}
+
+
+function handleGetDitanceMatrix(state, action){
+	return update(state, {
+		distanceMatrix:{
+			$set:action.payload
+		}
+	})
+}
+
+function handleGetFare(state, action){
+	return update(state, {
+		fare:{
+			$set:action.payload
+		}
+	})
+}
+
 const ACTION_HANDLERS={ 
-	GET_CURRENT_LOCATION:handleGetCurrentLocation
+	GET_CURRENT_LOCATION:handleGetCurrentLocation,
+	GET_INPUT:handleGetInputDate,
+	TOGGLE_SEARCH_RESULT:handleToggleSearchResult,
+	GET_ADDRESS_PREDICTIONS:handleGetAddressPredictions,
+	GET_SELECTED_ADDRESS:handleGetSelectedAddress,
+	GET_DISTANCE_MATRIX:handleGetDitanceMatrix,
+	GET_FARE:handleGetFare,
 
 	};
 
 const initialState = { 
-		region:{}
+		region:{},
+		inputData:{},
+		resultTypes:{},
+		selectedAddress:{}
+
  };
 
 

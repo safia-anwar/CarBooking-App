@@ -1,4 +1,4 @@
-package com.woowends;
+package com.fypwoowend;
 
 import com.facebook.react.ReactActivity;
 

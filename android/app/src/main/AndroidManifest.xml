@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.woowends">
+  package="com.fypwoowend">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
@@ -30,6 +30,8 @@
        <meta-data
         android:name="com.google.android.geo.API_KEY"
         android:value="AIzaSyDiK0I1j2iuF5HYh1jZWN8zmQa0JjDYt30"/>
+
+       
   
        <!-- You will also only need to add this uses-library tag -->
      <uses-library android:name="org.apache.http.legacy" android:required="false"/>
