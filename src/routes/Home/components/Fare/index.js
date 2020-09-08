@@ -8,8 +8,7 @@ export const Fare = ({fare})=>{
 	return (
 		<View style={styles.fareContainer}>
 			<Text>
-				<Text style={styles.fareText}> FARE: RM </Text> 
-                <Text style={styles.amount}>{fare}</Text>
+				<Text style={styles.fareText}> FARE: RS </Text> <Text style={styles.amount}>{fare}</Text>
 			</Text>
 			
 		</View>

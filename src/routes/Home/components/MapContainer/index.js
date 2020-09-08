@@ -17,6 +17,9 @@ export const MapContainer = ({region,
 		predictions,
         getSelectedAddress,
         selectedAddress}) => {
+
+     const { selectedPickUp, selectedDropOff } = selectedAddress || {};
+     
     return (
         <View style={styles.container}>
             <MapView

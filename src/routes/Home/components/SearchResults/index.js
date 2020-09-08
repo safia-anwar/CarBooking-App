@@ -9,6 +9,7 @@ import styles from "./SearchResultsStyles.js";
 
 
 export const SearchResults = ({predictions, getSelectedAddress} )=> {
+	
 	function handleSelectedAddress(placeID){
 		getSelectedAddress(placeID)
 	}

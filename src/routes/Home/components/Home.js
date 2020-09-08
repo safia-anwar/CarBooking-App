@@ -4,8 +4,8 @@ import { Container } from "native-base";
 
 import MapContainer  from "./MapContainer";
 import FooterComponent from "../../../components/FooterComponent";
-
 import Fare from "./Fare";
+import Fab from "./Fab";
 
 export default class Home extends React.Component{
 
@@ -25,8 +25,8 @@ export default class Home extends React.Component{
         return(
              
             <Container>
-                { this.props.region.latitude &&
-                    <MapContainer region={this.props.region}
+                    { this.props.region.latitude &&
+                     <MapContainer region={this.props.region}
                                   getInputData={this.props.getInputData}
                                   toggleSearchResultModal={this.props.toggleSearchResultModal}
                                   getAddressPredictions={this.props.getAddressPredictions}
@@ -37,8 +37,8 @@ export default class Home extends React.Component{
                     />
                     
                     }
-
-                    {
+                    <Fab onPressAction={()=>this.props.bookCar()}/>
+                        {
 							this.props.fare &&
 							<Fare fare={this.props.fare} />
 						}

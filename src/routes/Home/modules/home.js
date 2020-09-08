@@ -21,6 +21,7 @@ const { GET_CURRENT_LOCATION,
 		GET_SELECTED_ADDRESS,
 		GET_DISTANCE_MATRIX,
 		GET_FARE,
+		BOOK_CAR,
 		 } = constants;
 
 
@@ -157,6 +158,53 @@ export function getSelectedAddress(payload){
 	}
 }
 
+//BOOK CAR
+
+export function bookCar(){
+	return (dispatch, store)=>{
+		//const nearByDrivers = store().home.nearByDrivers;
+		//const nearByDriver = nearByDrivers[Math.floor(Math.random() * nearByDrivers.length)];
+		const payload = {
+			data:{
+				userName:"Safia Ansari",
+				pickUp:{
+					address:store().home.selectedAddress.selectedPickUp.address,
+					name:store().home.selectedAddress.selectedPickUp.name,
+					latitude:store().home.selectedAddress.selectedPickUp.latitude,
+					longitude:store().home.selectedAddress.selectedPickUp.latitude
+				},
+				dropOff:{
+					address:store().home.selectedAddress.selectedDropOff.address,
+					name:store().home.selectedAddress.selectedDropOff.name,
+					latitude:store().home.selectedAddress.selectedDropOff.latitude,
+					longitude:store().home.selectedAddress.selectedDropOff.latitude
+				},
+				fare:store().home.fare,
+				status:"pending"
+			},
+			//nearByDriver:{
+			//	socketId:nearByDriver.socketId,
+			//	driverId:nearByDriver.driverId,
+			//	latitude:nearByDriver.coordinate.coordinates[1],
+			//	longitude:nearByDriver.coordinate.coordinates[0]
+			//}
+		};
+
+		request.post("http://192.168.1.103:3000/api/bookings")
+		.send(payload)
+		.finish((error, res)=>{
+			dispatch({
+				type:BOOK_CAR,
+				payload:res.body
+				
+			});
+			
+		console.log(res.body);
+		});
+
+
+	};
+}
 
 
 //--------------------
@@ -275,6 +323,18 @@ function handleGetFare(state, action){
 	})
 }
 
+
+//handle book car
+
+function handleBookCar(state, action){
+	return update(state, {
+		booking:{
+			$set:action.payload
+		}
+	})
+}
+
+
 const ACTION_HANDLERS={ 
 	GET_CURRENT_LOCATION:handleGetCurrentLocation,
 	GET_INPUT:handleGetInputDate,
@@ -283,6 +343,7 @@ const ACTION_HANDLERS={
 	GET_SELECTED_ADDRESS:handleGetSelectedAddress,
 	GET_DISTANCE_MATRIX:handleGetDitanceMatrix,
 	GET_FARE:handleGetFare,
+	BOOK_CAR:handleBookCar,
 
 	};
 
