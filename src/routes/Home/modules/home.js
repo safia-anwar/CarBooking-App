@@ -22,6 +22,8 @@ const { GET_CURRENT_LOCATION,
 		GET_DISTANCE_MATRIX,
 		GET_FARE,
 		BOOK_CAR,
+		GET_NEARBY_DRIVERS
+
 		 } = constants;
 
 
@@ -44,7 +46,8 @@ const LONGITUDE_DELTA = ASPECT_RATIO * LATITUDE_DELTA;
 
 export function getCurrentLocation(){
 	return(dispatch)=>{
-		navigator.geolocation.getCurrentPosition(
+
+	navigator.geolocation.getCurrentPosition(
 			(position)=>{
 				dispatch({
 					type:GET_CURRENT_LOCATION,
@@ -183,10 +186,10 @@ export function bookCar(){
 				status:"pending"
 			},
 			//nearByDriver:{
-			//	socketId:nearByDriver.socketId,
-			//	driverId:nearByDriver.driverId,
-			//	latitude:nearByDriver.coordinate.coordinates[1],
-			//	longitude:nearByDriver.coordinate.coordinates[0]
+				//socketId:nearByDriver.socketId,
+				//driverId:nearByDriver.driverId,
+				//latitude:nearByDriver.coordinate.coordinates[0],
+				//longitude:nearByDriver.coordinate.coordinates[1]
 			//}
 		};
 
@@ -198,11 +201,32 @@ export function bookCar(){
 				payload:res.body
 				
 			});
-			
-		console.log(res.body);
 		});
 
 
+	};
+}
+
+
+
+//get nearby drivers
+
+export function getNearByDrivers(){
+	return(dispatch, store)=>{
+		request.get("http://192.168.1.103:3000/api/driverLocation")
+		.query({
+			latitude:store().home.region.latitude,
+			longitude:store().home.region.longitude
+		})
+		.finish((error, res)=>{
+			if(res){
+				dispatch({
+					type:GET_NEARBY_DRIVERS,
+					payload:res.body
+				});
+			}
+
+		});
 	};
 }
 
@@ -334,6 +358,16 @@ function handleBookCar(state, action){
 	})
 }
 
+//handle get nearby drivers
+function handleGetNearbyDrivers(state, action){
+	return update(state, {
+		nearByDrivers:{
+			$set:action.payload
+		}
+	});
+}
+
+
 
 const ACTION_HANDLERS={ 
 	GET_CURRENT_LOCATION:handleGetCurrentLocation,
@@ -344,7 +378,7 @@ const ACTION_HANDLERS={
 	GET_DISTANCE_MATRIX:handleGetDitanceMatrix,
 	GET_FARE:handleGetFare,
 	BOOK_CAR:handleBookCar,
-
+	GET_NEARBY_DRIVERS:handleGetNearbyDrivers
 	};
 
 const initialState = { 

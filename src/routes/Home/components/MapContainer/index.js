@@ -16,9 +16,12 @@ export const MapContainer = ({region,
         resultTypes,
 		predictions,
         getSelectedAddress,
-        selectedAddress}) => {
+        selectedAddress,
+        carMarker,
+		nearByDrivers }) => {
 
      const { selectedPickUp, selectedDropOff } = selectedAddress || {};
+
      
     return (
         <View style={styles.container}>
@@ -28,12 +31,26 @@ export const MapContainer = ({region,
                 region={region}
                 showsUserLocation={true}>
                
-               <MapView.Marker
+               
+					<MapView.Marker
 						coordinate={region}
 						pinColor="red"
 
-					/>
+					/>	
+
+                {
+					nearByDrivers && nearByDrivers.map((marker, index)=>
+						<MapView.Marker
+							key={index}
+							coordinate={{latitude:marker.coordinate.coordinates[0], longitude:marker.coordinate.coordinates[1] }}
+							image={carMarker}
+						/>	
+					)
+				}
+
+
              </MapView>
+
              <SearchBox getInputData={getInputData}
                         toggleSearchResultModal={toggleSearchResultModal}
                         getAddressPredictions={getAddressPredictions}

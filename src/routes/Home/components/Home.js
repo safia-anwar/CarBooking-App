@@ -7,11 +7,19 @@ import FooterComponent from "../../../components/FooterComponent";
 import Fare from "./Fare";
 import Fab from "./Fab";
 
+const carMarker = require("../../../assets/img/carMarker.png");
+
+
 export default class Home extends React.Component{
 
-    componentDidMount(){
-        this.props.getCurrentLocation();
-    }
+    componentDidMount() {
+		var rx = this;
+		this.props.getCurrentLocation();
+		setTimeout(function(){
+			rx.props.getNearByDrivers();
+
+		}, 20000);
+	}
       
     render()
     {   
@@ -26,7 +34,7 @@ export default class Home extends React.Component{
              
             <Container>
                     { this.props.region.latitude &&
-                     <MapContainer region={this.props.region}
+                        <MapContainer region={this.props.region}
                                   getInputData={this.props.getInputData}
                                   toggleSearchResultModal={this.props.toggleSearchResultModal}
                                   getAddressPredictions={this.props.getAddressPredictions}
@@ -34,7 +42,10 @@ export default class Home extends React.Component{
                                   predictions={this.props.predictions}
                                   getSelectedAddress={this.props.getSelectedAddress}
                                   selectedAddress={this.props.selectedAddress}
-                    />
+                                  carMarker={carMarker}
+                                  nearByDrivers={this.props.nearByDrivers}
+
+                          />
                     
                     }
                     <Fab onPressAction={()=>this.props.bookCar()}/>
