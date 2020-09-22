@@ -1,1 +1,1 @@
-# redux-setting
+# Carpooling Application using React native
